@@ -1,5 +1,4 @@
 from irods.meta import iRODSMeta
-from irods import Collection, DataObject
 from mango_mdschema.helpers import flattened_from_mango_avu, unflatten
 
 
@@ -105,9 +104,18 @@ def prepare_metadata_for_download(metadict: dict, no_label: str = "other") -> di
     return reorganized_metadata
 
 
-def convert_metadata_to_dict(irods_item: Collection | DataObject) -> dict:
+def convert_metadata_to_dict(metadata_items) -> dict:
+    """Convert iterable of iRODSMeta into nested dictionary
+
+    Args:
+        metadata_items (list of iRODSMeta): Metadata items from one data object or collection
+
+    Example:
+        convert_metadata_to_dict(irods_item.metadata.items())
+
+    """
     metadict = {"schema": {}}
-    for item in irods_item.metadata.items():
+    for item in metadata_items:
         if item.name.startswith("mgs"):
             schema_name = item.name.split(".")[1]
             if schema_name not in metadict["schema"]:

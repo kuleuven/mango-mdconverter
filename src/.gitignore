@@ -1,0 +1,3 @@
+/.quarto/
+/.pytest_cache
+mango_mdconverter/__pycache__
