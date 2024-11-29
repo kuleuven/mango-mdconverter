@@ -22,6 +22,9 @@ repository = "https://github.com/kuleuven/mango-mdconverter"
 dependencies = {file = ["requirements.txt"]}
 optional-dependencies.dev = { file = ["requirements-dev.txt"] }
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
 include = ['mango_mdconverter', 'mango_mdconverter.*']
 
