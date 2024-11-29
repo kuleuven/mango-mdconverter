@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["dependencies", "optional-dependencies"]
+name = "mango-md2json"
+description = "ManGO metadata conversion"
+readme = "README.md"
+requires-python = ">=3.8"
+version = "1.0.2"
+license = {file = "LICENSE"}
+authors = [
+    { name = "Mariana Montes", email = "mariana.montes@kuleuven.be" },
+    { name = "Paul Borgermans", email = "paul.borgermans@kuleuven.be" },
+]
+
+[project.urls]
+repository = "https://github.com/kuleuven/mango-md2json"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies.dev = { file = ["requirements-dev.txt"] }
+
+[tool.setuptools.packages.find]
+include = ['mango_md2json', 'mango_md2json.*']
+
+[tool.pylint."messages control"]
+disable = ["too-many-arguments"]
+
+[tool.pylint.reports]
+output-format = ["colorized"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
