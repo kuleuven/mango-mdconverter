@@ -8,7 +8,7 @@ name = "mango-mdconverter"
 description = "ManGO metadata conversion"
 readme = "README.md"
 requires-python = ">=3.8"
-version = "1.0.3"
+version = "1.0.4"
 license = {file = "LICENSE"}
 authors = [
     { name = "Mariana Montes", email = "mariana.montes@kuleuven.be" },
@@ -22,11 +22,6 @@ repository = "https://github.com/kuleuven/mango-mdconverter"
 dependencies = {file = ["requirements.txt"]}
 optional-dependencies.dev = { file = ["requirements-dev.txt"] }
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-include = ['mango_mdconverter', 'mango_mdconverter.*']
 
 [tool.pylint."messages control"]
 disable = ["too-many-arguments"]
