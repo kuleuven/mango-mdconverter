@@ -42,6 +42,8 @@ def unflatten_namespace_into_dict(
         lead_key, rest = namespaced_string.split(".", 1)
         if lead_key not in target_dict:
             target_dict[lead_key] = {}
+        if not isinstance(target_dict[lead_key], dict):
+            target_dict[lead_key] = {"__value__": target_dict[lead_key]}
         unflatten_namespace_into_dict(
             target_dict[lead_key], rest, value, use_units, units
         )

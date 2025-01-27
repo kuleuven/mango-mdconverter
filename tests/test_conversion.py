@@ -74,6 +74,8 @@ class TestMd2Dict(unittest.TestCase):
             iRODSMeta("mg.mime_type", "text/plain"),
             iRODSMeta("page_n", "567", "analysis/reading"),
             iRODSMeta("chapter_n", "15", "analysis/reading"),
+            iRODSMeta("ns.section", "1"),
+            iRODSMeta("ns.section.title", "section_title"),
         ]
 
     def test_unpacking(self):
@@ -124,6 +126,7 @@ class TestMd2Dict(unittest.TestCase):
             },
             "mg": {"mime_type": "text/plain"},
             "analysis": {"reading": {"page_n": "567", "chapter_n": "15"}},
+            "ns": {"section": {"__value__": "1", "title": "section_title"}},
         }
         self.assertEqual(reorganized_dict, expected_dict)
 
