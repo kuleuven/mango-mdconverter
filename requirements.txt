@@ -1,2 +1,2 @@
-mango-mdschema>=1.0.3
+mango-mdschema==1.0.2
 python-irodsclient==2.2.0
