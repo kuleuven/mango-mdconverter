@@ -5,18 +5,18 @@ from mango_mdschema.helpers import flattened_from_mango_avu, unflatten
 def safely_add_to_dict(regular_dict: dict, key, value, units=None):
     """Compile dictionary with key-value pairs or key-(value, units) pairs from AVUs.
     Make lists out of multivalued fields."""
-    value = value if units is None else (value, units)
+    _value = value if units is None else (value, units)
     if key in regular_dict:
         if type(regular_dict[key]) == list:
-            regular_dict[key].append(value)
-        elif type(regular_dict[key]) == dict and type(value) != dict:
-            regular_dict[key]["__value__"] = value
+            regular_dict[key].append(_value)
+        elif type(regular_dict[key]) == dict and type(_value) != dict:
+            safely_add_to_dict(regular_dict[key], "__value__", value, units)
         elif (existing_value := regular_dict[key]) is not None:
-            regular_dict[key] = [existing_value, value]
+            regular_dict[key] = [existing_value, _value]
         else:  # basically None value
-            regular_dict[key] = value
+            regular_dict[key] = _value
     else:
-        regular_dict[key] = value
+        regular_dict[key] = _value
 
 
 def unflatten_namespace_into_dict(
