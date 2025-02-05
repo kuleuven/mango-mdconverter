@@ -47,7 +47,7 @@ def test_namespaced_unflattening():
         metadict, "level1.level2", "value2", True, "units"
     )
     assert metadict == {
-        "level1": {"level2": [{"level3": "value"}, ("value2", "units")]}
+        "level1": {"level2": {"level3": "value", "__value__": ("value2", "units")}}
     }
 
 
@@ -65,9 +65,20 @@ def metadata_items():
         iRODSMeta("mg.mime_type", "text/plain"),
         iRODSMeta("page_n", "567", "analysis/reading"),
         iRODSMeta("chapter_n", "15", "analysis/reading"),
+    ]
+
+
+@pytest.fixture
+def bad_namespacing():
+    return [
         iRODSMeta("ns.section", "1"),
         iRODSMeta("ns.section.title", "section_title"),
     ]
+
+
+@pytest.fixture
+def bad_namespacing_converted():
+    return {"ns": {"section": {"title": "section_title", "__value__": "1"}}}
 
 
 @pytest.fixture
@@ -84,7 +95,6 @@ def converted_dict():
         },
         "mg": {"mime_type": "text/plain"},
         "analysis": {"reading": {"page_n": "567", "chapter_n": "15"}},
-        "ns": {"section": {"__value__": "1", "title": "section_title"}},
     }
 
 
@@ -114,3 +124,16 @@ def test_unpacking(metadata_items):
 def test_mango_conversion(metadata_items, converted_dict):
     reorganized_dict = md2dict.convert_metadata_to_dict(metadata_items)
     assert reorganized_dict == converted_dict
+
+    # metadata_items.reverse()
+    # reorganized_dict2 = md2dict.convert_metadata_to_dict(metadata_items)
+    # assert reorganized_dict2 == converted_dict
+
+
+def test_bad_namespacing_conversion(bad_namespacing, bad_namespacing_converted):
+    reorganized_dict = md2dict.convert_metadata_to_dict(bad_namespacing)
+    assert reorganized_dict == bad_namespacing_converted
+
+    bad_namespacing.reverse()
+    reorganized_dict = md2dict.convert_metadata_to_dict(bad_namespacing)
+    assert reorganized_dict == bad_namespacing_converted

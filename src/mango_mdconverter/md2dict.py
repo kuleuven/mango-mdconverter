@@ -9,6 +9,8 @@ def safely_add_to_dict(regular_dict: dict, key, value, units=None):
     if key in regular_dict:
         if type(regular_dict[key]) == list:
             regular_dict[key].append(value)
+        elif type(regular_dict[key]) == dict and type(value) != dict:
+            regular_dict[key]["__value__"] = value
         elif (existing_value := regular_dict[key]) is not None:
             regular_dict[key] = [existing_value, value]
         else:  # basically None value
