@@ -134,13 +134,13 @@ def convert_metadata_to_dict(metadata_items) -> dict:
     return prepare_metadata_for_download(metadict)
 
 
-def filter_metadata_dict(metadict, filters: dict | list = {}) -> dict:
+def filter_metadata_dict(metadict, filters: dict = {}) -> dict:
     """Filter an dictionary of metadata to only retrieve certain keys.
 
     Args:
         metadict (any): Initially, the metadata dictionary, but then
           it is applied recursively to any value within the metadata dictionary.
-        filters (dict, optional): An array or dictionary of keys, indicating which keys of
+        filters (dict or list, optional): An array or dictionary of keys, indicating which keys of
           the metadict should be included. For nested fields, the value should be
           another dict of the same format. Otherwise, an empty dictionary or
           `None` as value is enough. Defaults to `{}`, which results in the
