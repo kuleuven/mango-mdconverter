@@ -140,7 +140,7 @@ def filter_metadata_dict(metadict, filters: dict = {}) -> dict:
     Args:
         metadict (any): Initially, the metadata dictionary, but then
           it is applied recursively to any value within the metadata dictionary.
-        filters (dict, optional): A dictionary of keys, indicating which keys of
+        filters (dict or list, optional): An array or dictionary of keys, indicating which keys of
           the metadict should be included. For nested fields, the value should be
           another dict of the same format. Otherwise, an empty dictionary or
           `None` as value is enough. Defaults to `{}`, which results in the
@@ -149,16 +149,24 @@ def filter_metadata_dict(metadict, filters: dict = {}) -> dict:
     Returns:
         dict: A (filtered) dictionary of metadata
     """
+    # no filters = return everything
     if filters is None or len(filters) == 0:
         return metadict
+    # allow array of keys
+    if isinstance(filters, list):
+        filters = {k: {} for k in filters}
     if not isinstance(filters, dict):
-        raise TypeError("The 'filters' argument should be a dictionary or empty.")
+        raise TypeError(
+            "The 'filters' argument should be a dictionary, an array of keys or empty."
+        )
+    # deal with repeatable composite fields
     if isinstance(metadict, list):
         return [filter_metadata_dict(d, filters) for d in metadict]
-    if isinstance(metadict, dict):
-        return {
-            k: filter_metadata_dict(v, filters.get(k, {}))
-            for k, v in metadict.items()
-            if k in filters
-        }
-    return metadict
+
+    if not isinstance(metadict, dict):
+        raise TypeError("The metadata dictionary should be a dict or a list of dicts.")
+    return {
+        k: filter_metadata_dict(v, filters.get(k, {}))
+        for k, v in metadict.items()
+        if k in filters
+    }
