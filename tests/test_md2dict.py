@@ -137,3 +137,39 @@ def test_bad_namespacing_conversion(bad_namespacing, bad_namespacing_converted):
     bad_namespacing.reverse()
     reorganized_dict = md2dict.convert_metadata_to_dict(bad_namespacing)
     assert reorganized_dict == bad_namespacing_converted
+
+
+def test_filtering(converted_dict):
+    assert md2dict.filter_metadata_dict(converted_dict) == converted_dict
+
+    only_schemas = md2dict.filter_metadata_dict(converted_dict, ["schema"])
+    assert "schema" in only_schemas
+    assert len(only_schemas) == 1
+    assert only_schemas["schema"] == converted_dict["schema"]
+
+    only_schemas2 = md2dict.filter_metadata_dict(
+        converted_dict, ["schema", "doesnotexist"]
+    )
+    assert "schema" in only_schemas2
+    assert len(only_schemas2) == 1
+    assert only_schemas2["schema"] == converted_dict["schema"]
+
+    only_author = md2dict.filter_metadata_dict(
+        converted_dict, {"schema": {"book": {"author": {}}}}
+    )
+    assert "schema" in only_author
+    assert len(only_author) == 1
+    assert "book" in only_author["schema"]
+    assert "author" in only_author["schema"]["book"]
+    assert len(only_author["schema"]["book"]) == 1
+    assert only_author["schema"] != converted_dict["schema"]
+
+    schema_analysis = md2dict.filter_metadata_dict(
+        converted_dict, ["schema", "analysis"]
+    )
+    assert "schema" in schema_analysis
+    assert schema_analysis["schema"] == converted_dict["schema"]
+    assert "analysis" in schema_analysis
+    assert schema_analysis["analysis"] == converted_dict["analysis"]
+    assert len(schema_analysis) == 2
+    assert schema_analysis != converted_dict

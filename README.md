@@ -11,10 +11,31 @@ by flattening namespaced iRODS metadata items. This can be done:
 - reorganizing the dictionary to bring ManGO schemas together and
   “analysis” metadata together
 
+You can install this package with `pip`:
+
+``` python
+pip install mango-mdconverter
+```
+
+    Requirement already satisfied: mango-mdconverter in /home/mariana/repos/github/kuleuven/mango-mdconverter/venv/lib/python3.12/site-packages (0.0.8)
+    Requirement already satisfied: mango-mdschema>=1.0.3 in /home/mariana/repos/github/kuleuven/mango-mdconverter/venv/lib/python3.12/site-packages (from mango-mdconverter) (1.0.3)
+    Requirement already satisfied: python-irodsclient==2.2.0 in /home/mariana/repos/github/kuleuven/mango-mdconverter/venv/lib/python3.12/site-packages (from mango-mdconverter) (2.2.0)
+    Requirement already satisfied: PrettyTable>=0.7.2 in /home/mariana/repos/github/kuleuven/mango-mdconverter/venv/lib/python3.12/site-packages (from python-irodsclient==2.2.0->mango-mdconverter) (3.12.0)
+    Requirement already satisfied: defusedxml in /home/mariana/repos/github/kuleuven/mango-mdconverter/venv/lib/python3.12/site-packages (from python-irodsclient==2.2.0->mango-mdconverter) (0.7.1)
+    Requirement already satisfied: six>=1.10.0 in /home/mariana/repos/github/kuleuven/mango-mdconverter/venv/lib/python3.12/site-packages (from python-irodsclient==2.2.0->mango-mdconverter) (1.16.0)
+    Requirement already satisfied: validators>=0.22.0 in /home/mariana/repos/github/kuleuven/mango-mdconverter/venv/lib/python3.12/site-packages (from mango-mdschema>=1.0.3->mango-mdconverter) (0.22.0)
+    Requirement already satisfied: wcwidth in /home/mariana/repos/github/kuleuven/mango-mdconverter/venv/lib/python3.12/site-packages (from PrettyTable>=0.7.2->python-irodsclient==2.2.0->mango-mdconverter) (0.2.13)
+
+    [notice] A new release of pip is available: 24.3.1 -> 25.0
+    [notice] To update, run: python -m pip install --upgrade pip
+    Note: you may need to restart the kernel to use updated packages.
+
 The module can be imported like so:
 
 ``` python
 from mango_mdconverter import md2dict
+
+# from mango_mdconverter.md2dict import convert_metadata_to_dict # to import a specific function
 ```
 
 ## Example
@@ -148,3 +169,88 @@ reorganized_dict
 This function is to be used when converting ManGO metadata into a
 dictionary, in order to export it to a sidecar file, for downloading, or
 in the context of cold storage.
+
+## Dictionary filtering
+
+The `filter_metadata_dict()` function allows you to filter the metadata
+dictionary (naive or otherwise) based on the (nested) keys of interest.
+
+Let’s say that from the naive metadata dictionary `metadict` we only
+want the metadata fields from the “mgs” and “mg” namespaces - in that
+case, the second argument is an array with the desired keys:
+
+``` python
+md2dict.filter_metadata_dict(metadict, ["mgs", "mg"])
+```
+
+    {'mgs': {'book': {'author': {'name': [('Fulano De Tal', '1'),
+         ('Jane Doe', '2')],
+        'age': [('50', '1'), ('29', '2')],
+        'pet': [('cat', '1'), ('cat', '2'), ('parrot', '2')]},
+       'title': 'A random book title'}},
+     'mg': {'mime_type': 'text/plain'}}
+
+We could do the same with the ManGO-specific organization, to for
+example select the ManGO schemas and the analysis fields:
+
+``` python
+md2dict.filter_metadata_dict(reorganized_dict, ["schema", "analysis"])
+```
+
+    {'schema': {'book': {'author': [{'age': '50',
+         'name': 'Fulano De Tal',
+         'pet': 'cat'},
+        {'age': '29', 'name': 'Jane Doe', 'pet': ['cat', 'parrot']}],
+       'title': 'A random book title'}},
+     'analysis': {'reading': {'page_n': '567', 'chapter_n': '15'}}}
+
+This level of filtering is equivalent to doing the following:
+
+``` python
+{k: v for k, v in reorganized_dict.items() if k in ["schema", "analysis"]}
+```
+
+    {'schema': {'book': {'author': [{'age': '50',
+         'name': 'Fulano De Tal',
+         'pet': 'cat'},
+        {'age': '29', 'name': 'Jane Doe', 'pet': ['cat', 'parrot']}],
+       'title': 'A random book title'}},
+     'analysis': {'reading': {'page_n': '567', 'chapter_n': '15'}}}
+
+Where this function comes in particularly handy is when you want to
+filter nested fields. Say, for example, that you want to only retrieve
+specific schemas and/or specific analysis fields. While our example has
+only one schema, we can illustrate by selecting only the “title” of the
+“book” schema, discarding the “author”:
+
+``` python
+md2dict.filter_metadata_dict(reorganized_dict, {"schema": {"book": ["title"]}})
+```
+
+    {'schema': {'book': {'title': 'A random book title'}}}
+
+We can combine these partial dictionaries with full dictionaries
+(e.g. all of “analysis”) by providing an empty dictionary when we don’t
+want to filter further:
+
+``` python
+md2dict.filter_metadata_dict(
+    reorganized_dict, {"schema": {"book": ["title"]}, "analysis": {}}
+)
+```
+
+    {'schema': {'book': {'title': 'A random book title'}},
+     'analysis': {'reading': {'page_n': '567', 'chapter_n': '15'}}}
+
+This also works with repeatable composite fields. For example, by
+selecting only the “pet” and “name” of the “author” composite field,
+we’ll get an array of dictionaries with only the “pet” and “name” keys:
+
+``` python
+md2dict.filter_metadata_dict(
+    reorganized_dict, {"schema": {"book": {"author": ["name", "pet"]}}}
+)
+```
+
+    {'schema': {'book': {'author': [{'name': 'Fulano De Tal', 'pet': 'cat'},
+        {'name': 'Jane Doe', 'pet': ['cat', 'parrot']}]}}}
